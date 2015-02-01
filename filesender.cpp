@@ -4,7 +4,6 @@
 #include <sys/stat.h>
 #include <libgen.h>
 #include <iostream>
-#include <exception>
 #include <string>
 #include <cstdio>
 #include "udt.h"

@@ -1,6 +1,7 @@
 
-CXXFLAGS=-std=c++11 -g -O2 -Wall -L.
-LDLIBS=-ludt
+UDTDIR="/home/dan/src/third-party/udt-git/udt4/src"
+CXXFLAGS=-std=c++11 -g -O2 -Wall -I$(UDTDIR) -L$(UDTDIR)
+LDLIBS=-ludt -lpthread -lc
 
 all: filesender filereceiver
 

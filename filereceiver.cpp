@@ -5,7 +5,6 @@
 #include <libgen.h>
 #include <iostream>
 #include <fstream>
-#include <exception>
 #include <string>
 #include <vector>
 #include <array>
@@ -170,7 +169,7 @@ int main(int argc, char** argv)
                 size_t total_bytes_read = 0;
                 std::array<char,8192> buf;
                 while (total_bytes_read < filesize) {
-                    size_t bytes_to_read = min(buf.size(), filesize - total_bytes_read);
+                    size_t bytes_to_read = min((decltype(filesize))buf.size(), filesize - total_bytes_read);
                     int bytes_read = UDT::recv(s, buf.data(), bytes_to_read, 0);
                     if (bytes_read < 0)
                         throwlasterror();
@@ -183,7 +182,7 @@ int main(int argc, char** argv)
                     size_t total_bytes_read = 0;
                     std::array<char,8192> buf;
                     while (total_bytes_read < filesize) {
-                        size_t bytes_to_read = min(buf.size(), filesize - total_bytes_read);
+                        size_t bytes_to_read = min((decltype(filesize))buf.size(), filesize - total_bytes_read);
                         int bytes_read = UDT::recv(s, buf.data(), bytes_to_read, 0);
                         if (bytes_read < 0)
                             throwlasterror();

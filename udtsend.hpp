@@ -1,17 +1,24 @@
 #ifndef __UDTSEND_HPP__
 #define __UDTSEND_HPP__
 
+#include <cstring> // strerror
+#include <string>
+#include <arpa/inet.h>
+#include <exception>
+#include <stdint.h>
+#include "udt.h"
+
 struct packet_header {
-    char magic0;
-    char magic1;
+    uint8_t magic0;
+    uint8_t magic1;
 };
 
 struct file_header {
-    char magic0;
-    char magic1;
-    unsigned long st_size;
-    time_t mtime;
-    unsigned short filename_len;
+    uint8_t magic0;
+    uint8_t magic1;
+    uint32_t st_size; // So we can't support files larger than 4GB...
+    int32_t mtime;
+    uint16_t filename_len;
 
     file_header() {}
 
@@ -61,7 +68,7 @@ static void throwlasterror(const char * msg)
 //    throw UDTSendException(strerror(e));
 //}
 
-static void throwlasterrno(const char * msg)
+void throwlasterrno(const char * msg)
 {
     int e = errno;
     snprintf(ex_msg_buf, ex_msg_buflen, "%s: %s", msg, strerror(e));
