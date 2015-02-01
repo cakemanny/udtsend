@@ -1,0 +1,15 @@
+# The output
+filesender
+filereceiver
+*.dSYM/
+
+*.dylib
+udt.h
+test/
+testfile
+
+# Temp files
+.DS_Store
+._.*
+.*.swp
+
