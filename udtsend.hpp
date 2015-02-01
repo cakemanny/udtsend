@@ -24,7 +24,7 @@ struct file_header {
 
     file_header(std::string filename, struct stat* st)
         : magic0(0xfe), magic1(0xfe), st_size(htonl(st->st_size)),
-        mtime(st->st_mtime), filename_len(htons(filename.length()))
+        mtime(htonl(st->st_mtime)), filename_len(htons(filename.length()))
     { }
 };
 

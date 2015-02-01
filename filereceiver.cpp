@@ -148,7 +148,8 @@ int main(int argc, char** argv)
             memcpy(hdbuf + sig.size(), restofheader.data(), restofheader.size());
             unsigned long filesize = ntohl(header.st_size);
             std::cout << "filesize = " << filesize << std::endl;
-            std::cout << "lastmodifiedtime = " << header.mtime << std::endl;
+            long lastmodifiedtime = ntohl(header.mtime);
+            std::cout << "lastmodifiedtime = " << lastmodifiedtime << std::endl;
             unsigned short filename_len = ntohs(header.filename_len);
             std::cout << "filename_len = " << filename_len << std::endl;
 
@@ -196,8 +197,8 @@ int main(int argc, char** argv)
 
                 std::cout << "Setting lastmodified time" << std::endl;
                 struct utimbuf times = {
-                    .actime = header.mtime,
-                    .modtime = header.mtime
+                    .actime = lastmodifiedtime,
+                    .modtime = lastmodifiedtime
                 };
                 if (utime(output_path.c_str(), &times) < 0)
                     std::cerr << "Unable to correctly set the modified time for the file" << std::endl;
