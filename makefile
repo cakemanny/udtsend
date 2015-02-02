@@ -1,5 +1,5 @@
 
-UDTDIR="/home/dan/src/third-party/udt-git/udt4/src"
+UDTDIR="/Users/daniel/src/third-party/udt-git/udt4/src"
 CXXFLAGS=-std=c++11 -g -O2 -Wall -I$(UDTDIR) -L$(UDTDIR)
 LDLIBS=-ludt -lpthread -lc
 

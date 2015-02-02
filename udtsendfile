@@ -1,0 +1,38 @@
+#!/bin/bash
+
+#echo \$0 = $0
+#echo \$1 = $1
+#echo \$2 = $2
+#
+#echo Sending file: $1
+
+IFS=':' read host dest <<< "$2"
+
+#echo host = $host
+#echo dest = $dest
+
+if [ -z "$1" ]; then
+    echo usage: $0 file-to-send user@host:/destination-dir
+    exit 1
+fi
+if [ ! -f "$1" ]; then
+    echo File does not exist: $1
+    exit 1
+fi
+
+if [ -z "$host" ]; then
+    echo Must choose a remote host
+    exit 1
+fi
+if [ -z "$dest" ]; then
+    echo Must choose a destination directory on the remote box
+    exit 1
+fi
+
+ip_addr=$(ifconfig | grep 192 | cut -d" " -f2)
+
+./filesender "$1" &
+ssh $host 'LD_LIBRARY_PATH=~/src/third-party/udt-git/udt4/src' \
+    '~/src/cpp/udtsend/filereceiver' -H$ip_addr -p9002 -d"$dest"
+
+

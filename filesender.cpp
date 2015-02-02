@@ -6,16 +6,65 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+#include <getopt.h> //getopt_long
 #include "udt.h"
 #include "udtsend.hpp"
 
+struct option long_options[] = {
+    { "help",   no_argument,        NULL, 'h' },
+    { "addr",   required_argument,  NULL, 'a' },
+    { "port",   required_argument,  NULL, 'p' },
+    { 0, 0, 0, 0 }
+};
+
+char* program_name = NULL;
+char* listen_addr = NULL;
+int listen_port = 9002;
+
+static void print_usage_and_exit(int status) {
+    FILE* out = (status == 0) ? stdout : stderr;
+
+    fprintf(out, "Usage: %s [OPTION]... FILE ...\n", program_name);
+    fputs("\
+\n\
+  -h, --help                display this help message\n\
+  -a, --addr=<0.0.0.0>      IP address to bind to\n\
+  -p, --port=<9002>         port to listen on\n\
+", out);
+    exit(status);
+}
+
+
 int main(int argc, char** argv)
 {
-    if (argc < 2) {
-        std::cerr << "usage: " << argv[0] << " <file-to-send> ..." << std::endl;
-        return 1;
+    program_name = argv[0];
+    int c;
+    while ( (c = getopt_long(argc, argv, "ha:p:", long_options, NULL)) != -1 ) {
+        switch (c) {
+            case 'h':
+                print_usage_and_exit(0);
+                break;
+            case 'a':
+                listen_addr = optarg;
+                break;
+            case 'p':
+                listen_port = atoi(optarg);
+                break;
+            case '?':
+                print_usage_and_exit(1);
+                break;
+            default: // Shouldn't happen
+                fprintf(stderr, "bad option: %c\n", optopt);
+                print_usage_and_exit(1);
+                break;
+        }
     }
-    for (int i = 1; i < argc; i++) {
+    argc -= optind;
+    argv += optind;
+    if (argc < 1) {
+        print_usage_and_exit(1);
+    }
+    for (int i = 0; i < argc; i++) {
         struct stat st;
         int res = stat(argv[i], &st);
         if (res < 0) {
@@ -35,8 +84,17 @@ int main(int argc, char** argv)
         sockaddr_in our_addr = {};
         our_addr.sin_family = AF_INET;
         our_addr.sin_port = htons(9002);
-        our_addr.sin_addr.s_addr = INADDR_ANY;
-        std::cout << "Binding to (0.0.0.0, 9002)" << std::endl;
+
+        if (listen_addr == NULL) {
+            our_addr.sin_addr.s_addr = INADDR_ANY;
+            std::cout << "Binding to (0.0.0.0, " <<
+                listen_port << ")" << std::endl;
+        } else {
+            if (inet_aton(listen_addr, &our_addr.sin_addr) < 0)
+                throwlasterrno("Unrecognised address format");
+            std::cout << "Binding to (" << listen_addr << ", " <<
+                listen_port << ")" << std::endl;
+        }
         if (UDT::bind(ss, (struct sockaddr*)&our_addr, sizeof our_addr) == UDT::ERROR)
             throwlasterror();
 
@@ -51,7 +109,7 @@ int main(int argc, char** argv)
             inet_ntoa(remote_addr.sin_addr) << ":" <<
             ntohs(remote_addr.sin_port) << std::endl;
 
-        for (int i = 1; i < argc; i++) {
+        for (int i = 0; i < argc; i++) {
             struct stat st;
             if (stat(argv[i], &st) < 0)
                 throwlasterrno("Unable to stat file");
